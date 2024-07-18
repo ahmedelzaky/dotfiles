@@ -25,7 +25,7 @@ source $ZSH/oh-my-zsh.sh
 # export MANPATH="/usr/local/man:$MANPATH"
 export PATH="$PATH:/opt/nvim-linux64/bin:$HOME/.cargo/bin:$HOME/bin"
 
-# export LANG=en_US.UTF-8
+ export LANG=en_US.UTF-8
 
 #Preferred editor for local and remote sessions
  #if [[ -n $SSH_CONNECTION ]]; then
@@ -43,7 +43,10 @@ export PATH="$PATH:/opt/nvim-linux64/bin:$HOME/.cargo/bin:$HOME/bin"
  alias q='nala search'
  alias apt='nala'
 
- # Check if ripgrep is installed
+if command -v logo-ls &> /dev/null; then
+    alias ls='logo-ls'
+fi
+
 if command -v rg &> /dev/null; then
     # Alias grep to rg if ripgrep is installed
     alias grep='rg'
@@ -445,4 +448,3 @@ function hb {
 if [ -e /home/zekwa/.nix-profile/etc/profile.d/nix.sh ]; then . /home/zekwa/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
 export PATH=$HOME/.local/bin:$PATH
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
