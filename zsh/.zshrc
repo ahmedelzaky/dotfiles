@@ -47,15 +47,6 @@ if command -v logo-ls &> /dev/null; then
     alias ls='logo-ls'
 fi
 
-if command -v rg &> /dev/null; then
-    # Alias grep to rg if ripgrep is installed
-    alias grep='rg'
-else
-    # Alias grep to /usr/bin/grep with GREP_OPTIONS if ripgrep is not installed
-    alias grep="/usr/bin/grep $GREP_OPTIONS"
-fi
-unset GREP_OPTIONS
-
 # Change directory aliases
 alias home='cd ~'
 alias cd..='cd ..'
@@ -161,16 +152,6 @@ up() {
 		d=..
 	fi
 	cd $d
-}
-
-# Automatically do an ls after each cd, z, or zoxide
-cd ()
-{
-	if [ -n "$1" ]; then
-		builtin cd "$@" && ls
-	else
-		builtin cd ~ && ls
-	fi
 }
 
 # Returns the last 2 fields of the working directory
