@@ -14,8 +14,8 @@ plugins=(
   git 
   zsh-autosuggestions
   zsh-256color
-  zsh-syntax-highlighting 
-  starship
+  zsh-syntax-highlighting
+  command-not-found
 )
 
 source $ZSH/oh-my-zsh.sh
