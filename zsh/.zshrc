@@ -25,7 +25,6 @@ source $ZSH/oh-my-zsh.sh
 # export MANPATH="/usr/local/man:$MANPATH"
 export PATH="$PATH:/opt/nvim-linux64/bin:$HOME/.cargo/bin:$HOME/bin"
 
- export LANG=en_US.UTF-8
 
 #Preferred editor for local and remote sessions
  #if [[ -n $SSH_CONNECTION ]]; then
@@ -43,8 +42,8 @@ export PATH="$PATH:/opt/nvim-linux64/bin:$HOME/.cargo/bin:$HOME/bin"
  alias q='nala search'
  alias apt='nala'
 
-if command -v logo-ls &> /dev/null; then
-    alias ls='logo-ls'
+if command -v eza &> /dev/null; then
+    alias ls='eza --icons=auto'
 fi
 
 # Change directory aliases
@@ -154,152 +153,7 @@ up() {
 	cd $d
 }
 
-# Returns the last 2 fields of the working directory
-pwdtail() {
-	pwd | awk -F/ '{nlast = NF -1;print $nlast"/"$NF}'
-}
 
-# Show the current distribution
-distribution () {
-    local dtype="unknown"  # Default to unknown
-
-    # Use /etc/os-release for modern distro identification
-    if [ -r /etc/os-release ]; then
-        source /etc/os-release
-        case $ID in
-            fedora|rhel|centos)
-                dtype="redhat"
-                ;;
-            sles|opensuse*)
-                dtype="suse"
-                ;;
-            ubuntu|debian)
-                dtype="debian"
-                ;;
-            gentoo)
-                dtype="gentoo"
-                ;;
-            arch|manjaro)
-                dtype="arch"
-                ;;
-            slackware)
-                dtype="slackware"
-                ;;
-            *)
-                # Check ID_LIKE only if dtype is still unknown
-                if [ -n "$ID_LIKE" ]; then
-                    case $ID_LIKE in
-                        *fedora*|*rhel*|*centos*)
-                            dtype="redhat"
-                            ;;
-                        *sles*|*opensuse*)
-                            dtype="suse"
-                            ;;
-                        *ubuntu*|*debian*)
-                            dtype="debian"
-                            ;;
-                        *gentoo*)
-                            dtype="gentoo"
-                            ;;
-                        *arch*)
-                            dtype="arch"
-                            ;;
-                        *slackware*)
-                            dtype="slackware"
-                            ;;
-                    esac
-                fi
-
-                # If ID or ID_LIKE is not recognized, keep dtype as unknown
-                ;;
-        esac
-    fi
-
-    echo $dtype
-}
-
-
-DISTRIBUTION=$(distribution)
-if [ "$DISTRIBUTION" = "redhat" ] || [ "$DISTRIBUTION" = "arch" ]; then
-      alias cat='bat'
-else
-      alias cat='batcat'
-fi 
-
-# Show the current version of the operating system
-ver() {
-    local dtype
-    dtype=$(distribution)
-
-    case $dtype in
-        "redhat")
-            if [ -s /etc/redhat-release ]; then
-                cat /etc/redhat-release
-            else
-                cat /etc/issue
-            fi
-            uname -a
-            ;;
-        "suse")
-            cat /etc/SuSE-release
-            ;;
-        "debian")
-            lsb_release -a
-            ;;
-        "gentoo")
-            cat /etc/gentoo-release
-            ;;
-        "arch")
-            cat /etc/os-release
-            ;;
-        "slackware")
-            cat /etc/slackware-version
-            ;;
-        *)
-            if [ -s /etc/issue ]; then
-                cat /etc/issue
-            else
-                echo "Error: Unknown distribution"
-                exit 1
-            fi
-            ;;
-    esac
-}
-
-# Automatically install the needed support files for this .bashrc file
-install_bashrc_support() {
-	local dtype
-	dtype=$(distribution)
-
-	case $dtype in
-		"redhat")
-			sudo yum install multitail tree zoxide trash-cli fzf bash-completion fastfetch
-			;;
-		"suse")
-			sudo zypper install multitail tree zoxide trash-cli fzf bash-completion fastfetch
-			;;
-		"debian")
-			sudo apt-get install multitail tree zoxide trash-cli fzf bash-completion
-			# Fetch the latest fastfetch release URL for linux-amd64 deb file
-			FASTFETCH_URL=$(curl -s https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest | grep "browser_download_url.*linux-amd64.deb" | cut -d '"' -f 4)
-
-			# Download the latest fastfetch deb file
-			curl -sL $FASTFETCH_URL -o /tmp/fastfetch_latest_amd64.deb
-
-			# Install the downloaded deb file using apt-get
-			sudo apt-get install /tmp/fastfetch_latest_amd64.deb
-			;;
-		"arch")
-			sudo paru multitail tree zoxide trash-cli fzf bash-completion fastfetch
-			;;
-		"slackware")
-			echo "No install support for Slackware"
-			;;
-		*)
-			echo "Unknown distribution"
-			;;
-	esac
-}
 
 # IP address lookup
 alias whatismyip="whatsmyip"
@@ -318,67 +172,6 @@ function whatsmyip () {
     curl -s ifconfig.me
 }
 
-# View Apache logs
-apachelog() {
-	if [ -f /etc/httpd/conf/httpd.conf ]; then
-		cd /var/log/httpd && ls -xAh && multitail --no-repeat -c -s 2 /var/log/httpd/*_log
-	else
-		cd /var/log/apache2 && ls -xAh && multitail --no-repeat -c -s 2 /var/log/apache2/*.log
-	fi
-}
-
-# Edit the Apache configuration
-apacheconfig() {
-	if [ -f /etc/httpd/conf/httpd.conf ]; then
-		sedit /etc/httpd/conf/httpd.conf
-	elif [ -f /etc/apache2/apache2.conf ]; then
-		sedit /etc/apache2/apache2.conf
-	else
-		echo "Error: Apache config file could not be found."
-		echo "Searching for possible locations:"
-		sudo updatedb && locate httpd.conf && locate apache2.conf
-	fi
-}
-
-# Edit the PHP configuration file
-phpconfig() {
-	if [ -f /etc/php.ini ]; then
-		sedit /etc/php.ini
-	elif [ -f /etc/php/php.ini ]; then
-		sedit /etc/php/php.ini
-	elif [ -f /etc/php5/php.ini ]; then
-		sedit /etc/php5/php.ini
-	elif [ -f /usr/bin/php5/bin/php.ini ]; then
-		sedit /usr/bin/php5/bin/php.ini
-	elif [ -f /etc/php5/apache2/php.ini ]; then
-		sedit /etc/php5/apache2/php.ini
-	else
-		echo "Error: php.ini file could not be found."
-		echo "Searching for possible locations:"
-		sudo updatedb && locate php.ini
-	fi
-}
-
-# Edit the MySQL configuration file
-mysqlconfig() {
-	if [ -f /etc/my.cnf ]; then
-		sedit /etc/my.cnf
-	elif [ -f /etc/mysql/my.cnf ]; then
-		sedit /etc/mysql/my.cnf
-	elif [ -f /usr/local/etc/my.cnf ]; then
-		sedit /usr/local/etc/my.cnf
-	elif [ -f /usr/bin/mysql/my.cnf ]; then
-		sedit /usr/bin/mysql/my.cnf
-	elif [ -f ~/my.cnf ]; then
-		sedit ~/my.cnf
-	elif [ -f ~/.my.cnf ]; then
-		sedit ~/.my.cnf
-	else
-		echo "Error: my.cnf file could not be found."
-		echo "Searching for possible locations:"
-		sudo updatedb && locate my.cnf
-	fi
-}
 
 
 # Trim leading and trailing spaces (for scripts)
@@ -388,44 +181,21 @@ trim() {
 	var="${var%"${var##*[![:space:]]}"}" # remove trailing whitespace characters
 	echo -n "$var"
 }
-# GitHub Titus Additions
-
-gcom() {
-	git add .
-	git commit -m "$1"
-}
-lazyg() {
-	git add .
-	git commit -m "$1"
-	git push
-}
-
-function hb {
-    if [ $# -eq 0 ]; then
-        echo "No file path specified."
-        return
-    elif [ ! -f "$1" ]; then
-        echo "File path does not exist."
-        return
-    fi
-
-    uri="http://bin.christitus.com/documents"
-    response=$(curl -s -X POST -d @"$1" "$uri")
-    if [ $? -eq 0 ]; then
-        hasteKey=$(echo $response | jq -r '.key')
-        echo "http://bin.christitus.com/$hasteKey"
-    else
-        echo "Failed to upload the document."
-    fi
-}
 ########################################################
 
-
+if command -v pokemon-colorscripts &> /dev/null; then
  pokemon-colorscripts -r --no-title
- 
- eval "$(oh-my-posh init zsh --config ~/night-owl.omp.json)"
-# eval "$(starship init zsh)"
+fi
 
-if [ -e /home/zekwa/.nix-profile/etc/profile.d/nix.sh ]; then . /home/zekwa/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+if command -v zoxide  &> /dev/null; then
+	eval "$(zoxide init zsh)"
+	alias cd="z"
+fi
+
+# eval "$(oh-my-posh init zsh --config ~/night-owl.omp.json)"
+eval "$(starship init zsh)"
+
 export PATH=$HOME/.local/bin:$PATH
 
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
