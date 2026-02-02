@@ -7,6 +7,7 @@
 
   "modules-right": [
     "tray",
+    // "power-profiles-daemon",
     "temperature",
     "memory",
     "cpu",
@@ -83,15 +84,17 @@
   },
 
   "battery": {
-    "bat": "BAT0",
-    "interval": 60,
     "states": {
       "warning": 30,
       "critical": 15,
     },
     "format": "{capacity}% {icon}",
+    "format-warning": "{capacity}% <span size='13000' foreground='#B1E3AD'>{icon}</span>",
+    "format-critical": "{capacity}% <span size='13000' foreground='#E38C8F'>{icon}</span>",
+    "format-charging": "{capacity}% <span foreground='#A6DA95'></span>",
+    "format-plugged": "{capacity}% ",
     "format-icons": ["", "", "", "", ""],
-    "max-length": 25,
+    "tooltip-format": "{time}",
   },
 
   "backlight": {
@@ -111,8 +114,10 @@
   },
 
   "network": {
-    "format-wifi": " <span foreground='#8aadf4'> {bandwidthDownBytes}</span> <span foreground='#a6da95'> {bandwidthUpBytes}</span>",
-    "format-ethernet": "󰈀 <span foreground='#8aadf4'> {bandwidthDownBytes}</span> <span foreground='#a6da95'> {bandwidthUpBytes}</span>",
+    "format-wifi": "<span foreground='#b294bb'></span> <span foreground='#8aadf4'> {bandwidthDownBytes}</span> <span foreground='#a6da95'> {bandwidthUpBytes}</span>",
+    "format-ethernet": "<span foreground='#b294bb'>󰈀</span> <span foreground='#8aadf4'> {bandwidthDownBytes}</span> <span foreground='#a6da95'> {bandwidthUpBytes}</span>",
+    "format-disconnected": "",
+    "on-click-right": "nm-connection-editor",
     "interval": 1,
     "max-length": 30,
   },
@@ -164,10 +169,10 @@
   },
 
   "temperature": {
-    "thermal-zone": 2,
+    //"thermal-zone": 2,
     "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
     "critical-threshold": 80,
-    "format-critical": "{temperatureC}°C {icon}",
+    "format-critical": "<span foreground='#E38C8F'>{temperatureC}°C {icon}</span>",
     "format": "{temperatureC}°C {icon}",
     "format-icons": ["", "", ""],
   },
@@ -253,5 +258,17 @@
     "on-click-middle": "pkill rofi",
     "on-click-right": "rofi -show run -hover-select -me-select-entry '' -me-select-entry MousePrimary -location 1 -theme-str 'window {width: 30%; height: 40%; x-offset: 10px; y-offset: 10px; border-radius: 15px;}'",
     "tooltip": false,
+  },
+
+  "power-profiles-daemon": {
+    "format": "{icon}   {profile}",
+    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+    "tooltip": true,
+    "format-icons": {
+      "default": "",
+      "performance": "",
+      "balanced": "",
+      "power-saver": "",
+    },
   },
 }
